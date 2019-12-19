@@ -139,11 +139,6 @@ def CalculateUtilities(Value, F, SigmaD, PA, SigmaA, PD, SA, SD, Optimal_A, Opti
     return attacker_payoffs, defender_payoffs
 
 
-
-
-
-
-
 def MixedStrategies(SA, SD, PA, PD, M, Value, F, Defender_Rationality, Attacker_Rationality):
     Sigma_A = PD
     Sigma_D = PA
@@ -162,11 +157,9 @@ def MixedStrategies(SA, SD, PA, PD, M, Value, F, Defender_Rationality, Attacker_
         Old_Sigma_D = Sigma_D
         Old_Sigma_A = Sigma_A
         Old_Optimal_A = Optimal_A
-        #Optimal_A, Utility_A = AttackerOptimalStrategy(SA, Sigma_D, Sigma_A, Value, SD, F, Attacker_Rationality)
         Optimal_A = AttackerOptimalStrategy(SA, Sigma_D, Sigma_A, Value, SD, F, Attacker_Rationality)
         Old_Optimal_D = Optimal_D
 
-        #Optimal_D, Utility_D = DefenderOptimalStrategy(SD, Sigma_D, Sigma_A, Value, SA, F, Defender_Rationality)
         Optimal_D = DefenderOptimalStrategy(SD, Sigma_D, Sigma_A, Value, SA, F, Defender_Rationality)
         Sigma_D = Update_Empirical_Frequency_Attacker(Old_Sigma_D, K, SA, Optimal_A, Old_Optimal_A)
         Sigma_A = Update_Empirical_Frequency_Defender(Old_Sigma_A, K, SD, Optimal_D, Old_Optimal_D)
@@ -180,11 +173,8 @@ def MixedStrategies(SA, SD, PA, PD, M, Value, F, Defender_Rationality, Attacker_
         if check == len(SA) + len(SD):
             C_Test = 1
         K = K + 1
-        #print("Utility of Attacker: ",Utility_A )
-        #print("Utility of Defender: ", Utility_D)
-    print(K)
-    #Utility_A, Utility_D = CalculateUtilities(Value, F, Sigma_D, PA, Sigma_A, PD, SA, SD, Optimal_A, Optimal_D, Attacker_Rationality, Defender_Rationality)
 
+    #print(K)
     return Sigma_D, Sigma_A, Final_Utility_A, Final_Utility_D, Utility_A, Utility_D
 
 
@@ -196,6 +186,24 @@ def GetWeights(PA, Deception_Rationality):
     return weight_PA
 
 
-def LearningPhase(SA, SD, PA, PD, Attacker_Rationality, Learning_Iterations, Value, F, Defender_Rationality,M):
+def LearningPhase(SA, SD, PA, PD, Attacker_Rationality, Value, F, Defender_Rationality,M):
     PA, PD, Final_Utility_A, Final_Utility_D, Utility_A, Utility_D = MixedStrategies(SA, SD, PA, PD, M, Value, F, Defender_Rationality, Attacker_Rationality)
     return PA, PD, Final_Utility_A, Final_Utility_D, Utility_A, Utility_D
+
+
+def GamePhase(SA, SD, PA, PD, Value, F, CA):
+    tabledefender = MatrixCreation(SA,SD,Value,F)
+    tabledefender = tabledefender.T
+    tableattacker = -tabledefender.T
+    Final_Utility_D = 0.0
+    Final_Utility_A = 0.0
+    for i in range(0,CA):
+        Utility_D = np.dot(np.dot(PD, tabledefender),PA)
+        Utility_A = np.dot(np.dot(PA, tableattacker),PD)
+        Final_Utility_D = Final_Utility_D + Utility_D
+        Final_Utility_A = Final_Utility_A + Utility_A
+    # return Final_Utility_A, Final_Utility_D
+    return Final_Utility_A, Final_Utility_D, Utility_A, Utility_D
+
+
+
